@@ -4,7 +4,9 @@ const Community = require('../models/communityModel')
 const createAnnouncement = async (req, res) => {
   try {
     const userId = req.user._id
-    const { communityId, title, message } = req.body
+    // allow community id to come from body or the URL param (communityID)
+    const communityId = req.body.communityId || req.params.communityID || req.params.communityId
+    const { title, message } = req.body
 
     if (!communityId || !title || !message) {
       return res.status(400).json({ error: "Missing fields" })
@@ -36,7 +38,8 @@ const createAnnouncement = async (req, res) => {
 // Get announcements for a community
 const getAnnouncements = async (req, res) => {
   try {
-    const { communityId } = req.params
+    // support param name communityID or communityId
+    const communityId = req.params.communityID || req.params.communityId || req.body.communityId
 
     const community = await Community.findById(communityId).populate(
       'announcements.author',

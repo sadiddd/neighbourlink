@@ -2,7 +2,8 @@ const Community = require('../models/communityModel')
 
 const requireCommunityMembership = async (req, res, next) => {
     try {
-        const { communityID } = req.body
+        // allow community id in params (/:communityID) or in the body
+        const communityID = req.params.communityID || req.params.communityId || req.body.communityID || req.body.communityId
         const userID = req.user._id
 
         const community = await Community.findById(communityID);

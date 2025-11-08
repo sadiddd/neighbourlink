@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const userRoutes = require('./routes/user')
 const communityRoutes = require('./routes/community')
+const announcementRoutes = require('./routes/announcement')
+
 
 const app = express() //Express app
 
@@ -26,6 +28,7 @@ app.use((req, res, next) => {
 //TODO, define API routes
 app.use('/api/user', userRoutes)
 app.use('/api/community', communityRoutes)
+app.use('/api/announcements', announcementRoutes)
 
 
 // Connect to MongoDB and start the server
