@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const userRoutes = require('./routes/user')
 const communityRoutes = require('./routes/community')
+const http = require('http')            
+const { Server } = require('socket.io')
 
 const app = express() //Express app
 
@@ -23,16 +25,41 @@ app.use((req, res, next) => {
     next()
 })
 
+// Create HTTP server and Socket.IO server
+const server = http.createServer(app)
+const io = new Server(server, {
+    cors: {
+        origin: process.env.FRONTEND_URL,
+        methods:['GET', 'POST']
+    }
+});
+
+app.set('io', io)
+
+// Handle Socket.IO connections
+io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id)
+
+    socket.on('joinCommunity', (communityId) => { 
+        console.log(`Attempting to join room: ${communityId}`); // Add debug log
+        socket.join(`community_${communityId}`);
+        console.log(`Successfully joined room: community_${communityId}`); // Add debug log
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id)
+    })
+});
+
 //TODO, define API routes
 app.use('/api/user', userRoutes)
 app.use('/api/community', communityRoutes)
-
 
 // Connect to MongoDB and start the server
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         const port = process.env.PORT || 4000
-        app.listen(port, () => {
+        server.listen(port, () => {
             console.log('Backend running on port', port)
         })
     })

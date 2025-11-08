@@ -21,9 +21,15 @@ const loginUser = async (req, res) => {
 
 // signup a user
 const signupUser = async (req, res) => {
-    const {email, password} = req.body
+    const {email, password, communityId} = req.body
     try {
-        const user = await User.signup(email, password) //signup method from userModel
+        const user = await User.signup({email, password, communityId}) //signup method from userModel
+
+        const io = req.app.get('io') //get io instance from server.js
+        if (io && communityId) {
+            const payload = { userId: user._id, email: user.email, communityId }
+            io.to(`${communityId}`).emit('newMember', payload) //emit to all users in the community room
+        }
 
         const token = createToken(user._id) //create jwt
 

@@ -13,11 +13,16 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: true
+  },
+  community: {
+    type: Schema.Types.ObjectId,  // changed to ObjectId reference
+    ref: 'Community',            // add reference to Community model
+    required: false
   }
-})
+}, { timestamps: true })
 
 // static signup method (includes validation)
-userSchema.statics.signup = async function(email, password) { //cannot use arrow function here since we need 'this'
+userSchema.statics.signup = async function({email, password, community}) { //cannot use arrow function here since we need 'this'
 
     //validation
     if (!email || !password) {
@@ -41,7 +46,7 @@ userSchema.statics.signup = async function(email, password) { //cannot use arrow
     const salt = await brcrypt.genSalt(10) //use await since this step takes time
     const hashedPassword = await brcrypt.hash(password, salt)
 
-    const user = await this.create({email, password: hashedPassword})
+    const user = await this.create({email, password: hashedPassword, community: community || null})
     return user
 }
 
