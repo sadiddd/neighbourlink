@@ -2,21 +2,29 @@ require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
+const userRoutes = require('./routes/user')
 
 const app = express() //Express app
 
 // Enable CORS so the frontend can make requests
 app.use(cors({
-    origin: 'https://workoutapp-frontend-j4ve.onrender.com', // frontend URL
+    origin: '', // frontend URL
     methods: ['GET','POST','DELETE','PUT','PATCH'],
     credentials: true
 }))
 
-// Log incoming requests
+// Middleware
+app.use(express.json())
+
+// Log incoming requests (middleware)
 app.use((req, res, next) => {
     console.log(req.path, req.method)
     next()
 })
+
+//TODO, define API routes
+app.use('/api/user', userRoutes)
+
 
 // Connect to MongoDB and start the server
 mongoose.connect(process.env.MONGO_URI)
