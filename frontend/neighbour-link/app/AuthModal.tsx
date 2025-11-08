@@ -209,9 +209,69 @@
 //   },
 // });
 
-// AuthModal.tsx
-import React from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+// //again
+// // AuthModal.tsx
+// import React from "react";
+// import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+
+// type AuthModalProps = {
+//   visible: boolean;
+//   onClose: () => void;
+// };
+
+// export default function AuthModal({ visible, onClose }: AuthModalProps) {
+//   return (
+//     <Modal
+//       visible={visible}
+//       animationType="slide"
+//       transparent
+//       onRequestClose={onClose}
+//     >
+//       <View style={styles.overlay}>
+//         <View style={styles.modalContent}>
+//           <Text style={styles.heading}>Log In / Sign Up</Text>
+//           {/* TODO: Add form inputs here */}
+//           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+//             <Text style={styles.closeText}>Close</Text>
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+//     </Modal>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   overlay: {
+//     flex: 1,
+//     backgroundColor: "rgba(0,0,0,0.4)",
+//     justifyContent: "center",
+//     alignItems: "center",
+//   },
+//   modalContent: {
+//     width: "90%",
+//     padding: 20,
+//     backgroundColor: "#fff",
+//     borderRadius: 12,
+//   },
+//   heading: { fontSize: 18, fontWeight: "bold", marginBottom: 12 },
+//   closeButton: { marginTop: 12, alignSelf: "flex-end" },
+//   closeText: { color: "#007AFF", fontWeight: "bold" },
+// });
+
+import axios from "axios";
+import { useAuth } from "@/contexts/AuthContext";
+import React, { useState } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+} from "react-native";
 
 type AuthModalProps = {
   visible: boolean;
@@ -219,6 +279,51 @@ type AuthModalProps = {
 };
 
 export default function AuthModal({ visible, onClose }: AuthModalProps) {
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const { login } = useAuth();
+
+  const API_BASE = "http://localhost:4000/api/user";
+
+  const handleAuth = async () => {
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      if (mode === "signup") {
+        const { data } = await axios.post(`${API_BASE}/signup`, {
+          email,
+          password,
+        });
+        console.log("Signup success", data);
+        // If backend returns token on signup, log the user in
+        if (data?.token) {
+          await login(data);
+        }
+        onClose();
+      } else {
+        const { data } = await axios.post(`${API_BASE}/login`, {
+          email,
+          password,
+        });
+        console.log("Login success:", data);
+        // Expect server to return { email, token, ... }
+        if (data) {
+          await login(data);
+        }
+        onClose();
+      }
+    } catch (err: any) {
+      console.log(err.response?.data || err.message);
+      setErrorMsg(err.response?.data?.error || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Modal
       visible={visible}
@@ -227,9 +332,54 @@ export default function AuthModal({ visible, onClose }: AuthModalProps) {
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.heading}>Log In / Sign Up</Text>
-          {/* TODO: Add form inputs here */}
+        <View style={styles.container}>
+          <Text style={styles.title}>
+            {mode === "login" ? "Log In" : "Sign Up"}
+          </Text>
+
+          {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
+
+          <TextInput
+            placeholder="Email"
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+
+          <TextInput
+            placeholder="Password"
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleAuth}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>
+                {mode === "login" ? "Log In" : "Sign Up"}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setMode(mode === "login" ? "signup" : "login")}
+          >
+            <Text style={styles.switchText}>
+              {mode === "login"
+                ? "Don't have an account? Sign up"
+                : "Already have an account? Log in"}
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeText}>Close</Text>
           </TouchableOpacity>
@@ -242,17 +392,39 @@ export default function AuthModal({ visible, onClose }: AuthModalProps) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
-  modalContent: {
-    width: "90%",
-    padding: 20,
+  container: {
+    width: "85%",
     backgroundColor: "#fff",
     borderRadius: 12,
+    padding: 20,
   },
-  heading: { fontSize: 18, fontWeight: "bold", marginBottom: 12 },
-  closeButton: { marginTop: 12, alignSelf: "flex-end" },
-  closeText: { color: "#007AFF", fontWeight: "bold" },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 8,
+  },
+  button: {
+    backgroundColor: "#007AFF",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginVertical: 8,
+  },
+  buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  switchText: { textAlign: "center", color: "#007AFF", marginVertical: 8 },
+  closeButton: { marginTop: 8, alignItems: "center" },
+  closeText: { color: "#f87171", fontWeight: "bold" },
+  error: { color: "#f87171", textAlign: "center", marginBottom: 8 },
 });
