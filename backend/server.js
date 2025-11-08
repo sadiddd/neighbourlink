@@ -4,13 +4,7 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const userRoutes = require('./routes/user')
 const communityRoutes = require('./routes/community')
-<<<<<<< HEAD
-const http = require('http')            
-const { Server } = require('socket.io')
-=======
 const announcementRoutes = require('./routes/announcement')
-
->>>>>>> b3a9417aa2ca9dc3d614244b8af386806646c2a8
 
 const app = express() //Express app
 
