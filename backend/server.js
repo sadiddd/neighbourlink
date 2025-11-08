@@ -4,8 +4,13 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const userRoutes = require('./routes/user')
 const communityRoutes = require('./routes/community')
+<<<<<<< HEAD
 const http = require('http')            
 const { Server } = require('socket.io')
+=======
+const announcementRoutes = require('./routes/announcement')
+
+>>>>>>> b3a9417aa2ca9dc3d614244b8af386806646c2a8
 
 const app = express() //Express app
 
@@ -54,6 +59,7 @@ io.on('connection', (socket) => {
 //TODO, define API routes
 app.use('/api/user', userRoutes)
 app.use('/api/community', communityRoutes)
+app.use('/api/announcements', announcementRoutes)
 
 // Connect to MongoDB and start the server
 mongoose.connect(process.env.MONGO_URI)
