@@ -1,98 +1,156 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
+import { AlertTriangle, Navigation } from "lucide-react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import Header from "@/components/ui/acc/Header";
+// TODO: Implement these dialogs as React Native modals
+import CreateAlertDialog from "@/components/ui/acc/CreateAlertDialog";
+import CreateWalkDialog from "@/components/ui/acc/CreateWalkDialog";
 
-export default function HomeScreen() {
+export default function Home() {
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
+  const [walkDialogOpen, setWalkDialogOpen] = useState(false);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.container}>
+      <Header />
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <ScrollView contentContainerStyle={styles.main}>
+        <View style={styles.centerSection}>
+          <Text style={styles.heading}>Stay Safe Together</Text>
+          <Text style={styles.subheading}>
+            Connect with your community to help and be helped
+          </Text>
+        </View>
+
+        <View style={styles.buttonGrid}>
+          <TouchableOpacity
+            style={[styles.button, styles.destructiveButton]}
+            onPress={() => setAlertDialogOpen(true)}
+          >
+            <AlertTriangle width={40} height={40} color="#f87171" />
+            <Text style={styles.buttonText}>Create Emergency Alert</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.button, styles.outlineButton]}
+            onPress={() => setWalkDialogOpen(true)}
+          >
+            <Navigation width={40} height={40} color="#3b82f6" />
+            <Text style={styles.buttonText}>Start Walk & Report</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.statusGrid}>
+          <View style={[styles.statusCard, styles.general]}>
+            <View style={[styles.statusDot, styles.generalDot]} />
+            <Text style={styles.statusText}>General Help</Text>
+          </View>
+          <View style={[styles.statusCard, styles.moderate]}>
+            <View style={[styles.statusDot, styles.moderateDot]} />
+            <Text style={styles.statusText}>Moderate</Text>
+          </View>
+          <View style={[styles.statusCard, styles.severe]}>
+            <View style={[styles.statusDot, styles.severeDot]} />
+            <Text style={styles.statusText}>Severe</Text>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Alert Dialog */}
+      <Modal
+        visible={alertDialogOpen}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setAlertDialogOpen(false)}
+      >
+        <CreateAlertDialog
+          open={alertDialogOpen}
+          onOpenChange={setAlertDialogOpen}
+        />
+      </Modal>
+
+      {/* Walk Dialog */}
+      <Modal
+        visible={walkDialogOpen}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setWalkDialogOpen(false)}
+      >
+        <CreateWalkDialog
+          open={walkDialogOpen}
+          onOpenChange={setWalkDialogOpen}
+        />
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: { flex: 1, backgroundColor: "#fef3c7" }, // light gradient-ish color
+  main: { paddingHorizontal: 16, paddingVertical: 24, alignItems: "center" },
+  centerSection: { alignItems: "center", marginBottom: 24 },
+  heading: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#111827",
+    textAlign: "center",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  subheading: {
+    fontSize: 14,
+    color: "#6b7280",
+    textAlign: "center",
+    marginTop: 4,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  buttonGrid: { width: "100%", marginBottom: 32 },
+  button: {
+    height: 128,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+    padding: 12,
   },
+  destructiveButton: { backgroundColor: "#f87171" },
+  outlineButton: {
+    borderWidth: 2,
+    borderColor: "#3b82f6",
+    backgroundColor: "transparent",
+  },
+  buttonText: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#111827",
+    textAlign: "center",
+  },
+  statusGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 16,
+  },
+  statusCard: {
+    flex: 1,
+    alignItems: "center",
+    padding: 12,
+    borderRadius: 12,
+    marginHorizontal: 4,
+    borderWidth: 1,
+  },
+  statusDot: { width: 12, height: 12, borderRadius: 6, marginBottom: 4 },
+  statusText: { fontSize: 12, fontWeight: "500" },
+  general: { backgroundColor: "#d1fae5", borderColor: "#4ade80" },
+  generalDot: { backgroundColor: "#4ade80" },
+  moderate: { backgroundColor: "#fef3c7", borderColor: "#fbbf24" },
+  moderateDot: { backgroundColor: "#fbbf24" },
+  severe: { backgroundColor: "#fee2e2", borderColor: "#f87171" },
+  severeDot: { backgroundColor: "#f87171" },
 });
