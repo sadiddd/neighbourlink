@@ -27,6 +27,17 @@ const createAnnouncement = async (req, res) => {
 
     await community.save()
 
+    const newAnnouncement = community.announcements[community.announcements.length - 1]
+
+    // Emit notification to community room
+    const io = req.app.get('io')
+    if (io && communityId) {
+      const payload = {id: newAnnouncement._id, title, message, author: userId, createdAt: newAnnouncement.createdAt, communityId }
+      io.to(`community_${communityId}`).emit('announcementCreated', payload)
+      console.log(`Emitted announcementCreated to community_${communityId}`)
+    }
+    
+
     res.status(200).json({ success: true, community })
   } catch (error) {
     console.log(error)

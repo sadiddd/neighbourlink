@@ -13,22 +13,27 @@ socket.on("connect_error", (error) => {
 socket.on("connect", () => {
     console.log("\n=== Socket Test Client ===");
     console.log("Connected with ID:", socket.id);
-    
-    const testCommunityId = "690fc32ae44fecc70f115df8"; // Use your actual community ID
+
+    // IMPORTANT: set this to the exact community id you use in Postman
+    const testCommunityId = "690fd035f41bb8cbf5271678"; // <- replace with your community _id
+    console.log("Joining community room for id:", testCommunityId);
     socket.emit("joinCommunity", testCommunityId);
-    console.log(`Joined community room: ${testCommunityId}`);
-    console.log("Waiting for new members...\n");
+    console.log(`Emitted joinCommunity for ${testCommunityId}`);
+    console.log("Waiting for announcements...\n");
+});
+
+socket.on("announcementCreated", (payload) => {
+    console.log("📢 New announcement received:");
+    console.log(payload);
 });
 
 socket.on("newMember", (payload) => {
-    console.log("🔔 New Member Joined!");
-    console.log("Details:", payload);
-    console.log("-------------------\n");
+    console.log("🔔 New member joined:");
+    console.log(payload);
 });
 
 socket.on("disconnect", () => {
     console.log("❌ Disconnected from server");
 });
 
-// Keep the Node process running
 process.stdin.resume();

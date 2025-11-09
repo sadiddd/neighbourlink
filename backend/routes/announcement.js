@@ -9,6 +9,7 @@ router.use(requireAuth) //Protect all workout API routes (middleware)
 
 router.get('/:communityID', requireCommunityMembership, getAnnouncements) // get all announcements
 router.post('/:communityID', requireCommunityMembership, createAnnouncement) //make a new announcement
- 
+router.post('/', createAnnouncement)
+
 module.exports = router
 
