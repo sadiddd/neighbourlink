@@ -4,7 +4,7 @@ const router = express.Router();
 const { joinCommunity } = require('../controllers/communityController');
 const requireAuth = require('../middleware/requireAuth'); 
 
-router.use(requireAuth) //Protect all workout API routes (middleware)
+router.use(requireAuth) //Protect all API routes (middleware)
 
 // POST /api/community/join
 router.post('/join', joinCommunity);
