@@ -146,6 +146,7 @@
 
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useAuth } from "@/contexts/AuthContext";
 
 type HeaderProps = {
   onLogin?: () => void;
@@ -153,19 +154,41 @@ type HeaderProps = {
 };
 
 export default function Header({ onLogin, onSignUp }: HeaderProps) {
+  const { user, logout } = useAuth();
+
+  const displayName =
+    user?.name || user?.fullName || user?.email || (user ? "User" : null);
+
   return (
     <View style={styles.container}>
       <Text style={styles.logo}>NeighbourLink</Text>
+
       <View style={styles.buttons}>
-        <TouchableOpacity style={styles.button} onPress={onLogin}>
-          <Text style={styles.buttonText}>Log In</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.signUpButton]}
-          onPress={onSignUp}
-        >
-          <Text style={[styles.buttonText, styles.signUpText]}>Sign Up</Text>
-        </TouchableOpacity>
+        {user ? (
+          // Show the user's name in the top-right when authenticated
+          <TouchableOpacity
+            style={[styles.button, styles.userButton]}
+            onPress={() => logout()}
+            accessibilityLabel="User menu"
+          >
+            <Text style={styles.buttonText}>{displayName}</Text>
+          </TouchableOpacity>
+        ) : (
+          // Show login / signup buttons when not authenticated
+          <>
+            <TouchableOpacity style={styles.button} onPress={onLogin}>
+              <Text style={styles.buttonText}>Log In</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.signUpButton]}
+              onPress={onSignUp}
+            >
+              <Text style={[styles.buttonText, styles.signUpText]}>
+                Sign Up
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </View>
   );
@@ -202,6 +225,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
+  },
+  userButton: {
+    backgroundColor: "#007AFF",
   },
   signUpButton: {
     backgroundColor: "#fff",
